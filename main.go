@@ -16,6 +16,7 @@ func init() {
 
 var (
 	client *Client
+	k8s    *k8sClient
 )
 
 func main() {
@@ -25,10 +26,8 @@ func main() {
 		c.Render("index.html", nil)
 	})
 
-	iris.Get("/api/containers", func(ctx *iris.Context) {
-		containers := client.ListContainers()
-		ctx.JSON(iris.StatusOK, containers)
-	})
+	iris.Get("/api/containers", listContainers)
+	iris.Get("/api/nodes", listNodes)
 
 	iris.Get("/docker", func(c *iris.Context) {
 		fmt.Println("docker")
@@ -39,6 +38,7 @@ func main() {
 	iris.Config.Websocket.Endpoint = "/bash"
 
 	client = &Client{"http://127.0.0.1:2375"}
+	k8s = &k8sClient{"http://127.0.0.1:8080"}
 
 	input := make(chan []byte)
 
@@ -70,4 +70,14 @@ func main() {
 	})
 
 	iris.Listen("0.0.0.0:8088")
+}
+
+func listContainers(ctx *iris.Context) {
+	containers := client.ListContainers()
+	ctx.JSON(iris.StatusOK, containers)
+}
+
+func listNodes(ctx *iris.Context) {
+	nodes := k8s.Nodes()
+	ctx.JSON(iris.StatusOK, nodes)
 }

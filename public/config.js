@@ -1,6 +1,7 @@
 System.config({
   baseURL: "/public",
   defaultJSExtensions: true,
+  separateCSS: true,
   transpiler: "babel",
   babelOptions: {
     "optional": [
@@ -12,6 +13,7 @@ System.config({
     "github:*": "jspm_packages/github/*",
     "npm:*": "jspm_packages/npm/*",
     "app/*": "/frontend/*.js",
+    "dashboard/*": "/frontend/dashboard/*.js",
     "utils/*": "/frontend/utils/*.js",
   },
 

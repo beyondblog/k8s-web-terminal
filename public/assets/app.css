@@ -28,6 +28,8 @@ md-list .md-button {
   text-align: left;
   width: 100%;
   padding-top:10px;
+  padding-bottom:10px;
+  text-transform: none
 }
   md-list .md-button.selected {
     color: #03a9f4;
@@ -113,6 +115,7 @@ md-toolbar h1 {
   overflow: hidden;
   margin: 0px;
   vertical-align: middle;
+  margin-right: 10px;
 }
 
 

@@ -1,2 +1,2 @@
-# k8s-web-ssh
-Kubernetes web ssh
+# k8s-web-terminal
+Kubernetes web terminal
