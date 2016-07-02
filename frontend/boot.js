@@ -26,7 +26,7 @@ angular
   .element( document )
   .ready( function() {
 
-    let appName = 'kubernetes-web-ssh';
+    let appName = 'kubernetes-web-terminal';
     let $log = new ExternalLogger();
 
     $log = $log.getInstance( "BOOTSTRAP" );

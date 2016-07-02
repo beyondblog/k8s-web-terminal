@@ -13,6 +13,7 @@ function DashboardController( dashboardService, $mdSidenav, $mdBottomSheet, $log
   var self = this;
 
   self.selected     = null;
+  self.containers   = [];
   self.nodes        = [ ];
   self.selectNode   = selectNode;
   self.toggleList   = toggleNodesList;
@@ -21,10 +22,17 @@ function DashboardController( dashboardService, $mdSidenav, $mdBottomSheet, $log
   // Load all nodes
 
   dashboardService
-        .loadAll()
+        .loadNodes()
         .then(function(payload) {
           self.nodes    = [].concat(payload.data);
+
           self.selected = payload.data[0];
+
+          dashboardService
+            .loadContainers(self.selected.status.addresses[0].address)
+            .then(function(payload) {
+                self.containers = payload.data
+            });
         });
 
   // *********************************
@@ -40,57 +48,23 @@ function DashboardController( dashboardService, $mdSidenav, $mdBottomSheet, $log
   }
 
   /**
-   * Select the current avatars
+   * Show Containers
    * @param menuId
    */
   function selectNode ( node ) {
     $log.debug( "selectNode( {metadata.name} ) ", node);
 
     self.selected = angular.isNumber(node) ? $scope.nodes[node] : node;
+
+    dashboardService
+        .loadContainers(node.status.addresses[0].address)
+        .then(function(payload) {
+            self.containers = payload.data
+        });
+
     self.toggleList();
   }
 
-  /**
-   * Show the bottom sheet
-   */
-  //function share($event) {
-  //    $log.debug( "contactUser()");
-
-  //    var user = self.selected;
-
-  //    $mdBottomSheet.show({
-  //      parent: angular.element(document.getElementById('content')),
-  //      templateUrl: '/src/users/view/contactSheet.html',
-  //      controller: [ '$mdBottomSheet', '$log', UserSheetController],
-  //      controllerAs: "vm",
-  //      bindToController : true,
-  //      targetEvent: $event
-  //    }).then(function(clickedItem) {
-  //      $log.debug( clickedItem.name + ' clicked!');
-  //    });
-
-  //    /**
-  //     * Bottom Sheet controller for the Avatar Actions
-  //     */
-  //    function UserSheetController( $mdBottomSheet, $log ) {
-
-  //      $log = $log.getInstance( "UserSheetController" );
-  //      $log.debug( "instanceOf() ");
-
-  //      this.user = user;
-  //      this.items = [
-  //        { name: 'Phone'       , icon: 'phone'       , icon_url: 'assets/svg/phone.svg'},
-  //        { name: 'Twitter'     , icon: 'twitter'     , icon_url: 'assets/svg/twitter.svg'},
-  //        { name: 'Google+'     , icon: 'google_plus' , icon_url: 'assets/svg/google_plus.svg'},
-  //        { name: 'Hangout'     , icon: 'hangouts'    , icon_url: 'assets/svg/hangouts.svg'}
-  //      ];
-  //      this.performAction = function(action) {
-  //        $log.debug( "makeContactWith( {name} )", action);
-  //        $mdBottomSheet.hide(action);
-  //      };
-
-  //    }
-  //}
 }
 
 export default [

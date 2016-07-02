@@ -16,9 +16,6 @@ html, body {
   width: 36px;
 }
 
-md-toolbar h1 {
-  margin: auto;
-}
 
 /* Sidenav area */
 
@@ -101,8 +98,10 @@ md-button.menuBtn > md-icon {
 /* Typography support coming in 0.8.0 */
 
 md-toolbar h1 {
+  font-weight: inherit;
+  color: #fff;
   font-size: 1.250em;
-  font-weight: 400;
+  margin-left: 24px;
 }
 
 .avatar {

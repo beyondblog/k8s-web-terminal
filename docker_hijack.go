@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-type Client struct {
+type DockerClient struct {
 	Host string
 }
 
@@ -26,14 +26,20 @@ type ExecResponse struct {
 }
 
 type Container struct {
-	Id    string
-	Names []string
+	Id      string
+	Names   []string
+	Image   string
+	ImageID string
+	Command string
+	Created int64
+	Status  string
 }
 
-func (client *Client) ListContainers() []Container {
+func (client *DockerClient) ListContainers() []Container {
 	resp, err := http.Get(client.Host + "/containers/json")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("get container error")
+		return nil
 	}
 
 	defer resp.Body.Close()
@@ -46,7 +52,7 @@ func (client *Client) ListContainers() []Container {
 	return items
 }
 
-func (client *Client) CreateExec(id string, cmd string) (string, error) {
+func (client *DockerClient) CreateExec(id string, cmd string) (string, error) {
 	var jsonBody = strings.NewReader(`{
 		"AttachStdin": true,
 		"AttachStdout": true,
@@ -54,9 +60,10 @@ func (client *Client) CreateExec(id string, cmd string) (string, error) {
 		"DetachKeys": "ctrl-p,ctrl-q",
 		"Tty": true,
 		"Cmd": [
-			"/bin/bash"	
+		"` + cmd + `"
 		]
 	}`)
+
 	res, err := http.Post(client.Host+"/containers/"+id+"/exec", "application/json;charset=utf-8", jsonBody)
 
 	if err != nil {
@@ -75,14 +82,14 @@ func (client *Client) CreateExec(id string, cmd string) (string, error) {
 	return result.Id, nil
 }
 
-func (client *Client) ExecStart(id string, input chan []byte) (chan []byte, error) {
+func (client *DockerClient) ExecStart(id string, input chan []byte) (chan []byte, error) {
 
 	execUrl, _ := url.Parse(client.Host + "/exec/" + id + "/start")
 	return client.connect(execUrl, input)
 
 }
 
-func (client *Client) connect(url *url.URL, input chan []byte) (chan []byte, error) {
+func (client *DockerClient) connect(url *url.URL, input chan []byte) (chan []byte, error) {
 	output := make(chan []byte)
 
 	req, _ := http.NewRequest("POST", url.String(), strings.NewReader(

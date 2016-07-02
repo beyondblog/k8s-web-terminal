@@ -1,11 +1,3 @@
-/**
- * Users DataService
- * Uses embedded, hard-coded data model; acts asynchronously to simulate
- * remote data service call(s).
- *
- * @returns {{loadAll: Function}}
- * @constructor
- */
 function DashboardService($log, $http) {
     var users = [{
         Names: ['Lia Lugo'],
@@ -17,12 +9,16 @@ function DashboardService($log, $http) {
 
     // Promise-based API
     return {
-        loadAll: function() {
-            $log.debug("loadAll()");
+        loadNodes: function() {
+            $log.debug("loadNodes()");
             return $http.get('/api/nodes');
+        },
+        loadContainers: function(node) {
+            $log.debug("loadContainers()");
+            return $http.get('/api/nodes/containers?node=' + node);
         }
     };
 }
 
-export
-default ['$log', '$http', DashboardService];
+
+export default ['$log', '$http', DashboardService];

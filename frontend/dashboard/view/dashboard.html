@@ -25,9 +25,30 @@
             </md-list>
         </md-sidenav>
 
-        <md-content flex id="content">
-
+        <md-content flex class="md-padding" layout-xs="column" layout-align="center" layout="row">
+            <md-list flex>
+                <md-list-item ng-repeat="it in dl.containers">
+                    <div flex-xs flex-gt-xs="100" layout="column">
+                        <md-card md-theme="default" md-theme-watch>
+                            <md-card-title>
+                                <md-card-title-text>
+                                    <span class="md-headline">{{it.Id | limitTo: 11}}</span>
+                                    <span class="md-subhead">name: {{it.Names[0]}}</span>
+                                    <span class="md-subhead">image: {{it.Image}}</span>
+                                    <span class="md-subhead">command: {{it.Command}}</span>
+                                    <span class="md-subhead">created: {{it.Created*1000 | date:'medium'}}</span>
+                                    <span class="md-subhead">status: {{it.Status}}</span>
+                                </md-card-title-text>
+                            </md-card-title>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-fab md-primary" aria-label="ssh">
+                                    <md-icon md-svg-icon="terminal"></md-icon>
+                                </md-button>
+                            </md-card-actions>
+                        </md-card>
+                    </div>
+                </md-list-item>
+            </md-list>
         </md-content>
-
     </div>
 </div>

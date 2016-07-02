@@ -15,8 +15,8 @@ func init() {
 }
 
 var (
-	client *Client
-	k8s    *k8sClient
+	client *DockerClient
+	k8s    *K8sClient
 )
 
 func main() {
@@ -26,8 +26,8 @@ func main() {
 		c.Render("index.html", nil)
 	})
 
-	iris.Get("/api/containers", listContainers)
 	iris.Get("/api/nodes", listNodes)
+	iris.Get("/api/nodes/containers", listContainers)
 
 	iris.Get("/docker", func(c *iris.Context) {
 		fmt.Println("docker")
@@ -37,8 +37,8 @@ func main() {
 	// the path which the websocket client should listen/registed to ->
 	iris.Config.Websocket.Endpoint = "/bash"
 
-	client = &Client{"http://127.0.0.1:2375"}
-	k8s = &k8sClient{"http://127.0.0.1:8080"}
+	client = &DockerClient{"http://127.0.0.1:2375"}
+	k8s = &K8sClient{"http://127.0.0.1:8080", make(map[string]*DockerClient)}
 
 	input := make(chan []byte)
 
@@ -46,7 +46,7 @@ func main() {
 
 	ws.OnConnection(func(c websocket.Connection) {
 
-		id, _ := client.CreateExec("6544e9f086a6", "/bin/bash")
+		id, _ := client.CreateExec("e1bf3828b1d", "/bin/bash")
 		fmt.Println("id:" + id)
 		output, err := client.ExecStart(id, input)
 		fmt.Println(err)
@@ -73,8 +73,13 @@ func main() {
 }
 
 func listContainers(ctx *iris.Context) {
-	containers := client.ListContainers()
-	ctx.JSON(iris.StatusOK, containers)
+	node := ctx.URLParam("node")
+	if len(node) > 0 {
+		containers := k8s.GetContainer(node)
+		ctx.JSON(iris.StatusOK, containers)
+		return
+	}
+	ctx.Write("node require!")
 }
 
 func listNodes(ctx *iris.Context) {

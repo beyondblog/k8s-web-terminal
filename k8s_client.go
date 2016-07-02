@@ -7,8 +7,10 @@ import (
 	"net/http"
 )
 
-type k8sClient struct {
+type K8sClient struct {
 	Host string
+
+	dockerClient map[string]*DockerClient
 }
 
 type NodeList struct {
@@ -95,7 +97,7 @@ type NodeSystemInfo struct {
 	SystemUUID string `json:"systemUUID,omitempty" yaml:"system_uuid,omitempty"`
 }
 
-func (client *k8sClient) Nodes() []Node {
+func (client *K8sClient) Nodes() []Node {
 	resp, err := http.Get(client.Host + "/api/v1/nodes")
 	if err != nil {
 		log.Fatal(err)
@@ -108,4 +110,13 @@ func (client *k8sClient) Nodes() []Node {
 	json.Unmarshal(body, &nodeList)
 	return nodeList.Items
 
+}
+
+func (client *K8sClient) GetContainer(node string) []Container {
+	if _, ok := client.dockerClient[node]; !ok {
+		//using default port
+		client.dockerClient[node] = &DockerClient{"http://" + node + ":2375"}
+	}
+
+	return client.dockerClient[node].ListContainers()
 }
