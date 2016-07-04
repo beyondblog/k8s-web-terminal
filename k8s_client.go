@@ -120,3 +120,12 @@ func (client *K8sClient) GetContainer(node string) []Container {
 
 	return client.dockerClient[node].ListContainers()
 }
+
+func (client *K8sClient) GetDockerClient(node string) *DockerClient {
+	if _, ok := client.dockerClient[node]; !ok {
+		//using default port
+		client.dockerClient[node] = &DockerClient{"http://" + node + ":2375"}
+	}
+
+	return client.dockerClient[node]
+}

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/websocket"
+	"log"
 )
 
 func init() {
@@ -17,6 +17,7 @@ func init() {
 var (
 	client *DockerClient
 	k8s    *K8sClient
+	ws     websocket.Server
 )
 
 func main() {
@@ -28,46 +29,11 @@ func main() {
 
 	iris.Get("/api/nodes", listNodes)
 	iris.Get("/api/nodes/containers", listContainers)
+	iris.Get("/api/nodes/containers/shell/ws", shellContainer)
 
-	iris.Get("/docker", func(c *iris.Context) {
-		fmt.Println("docker")
-		c.Render("docker.html", map[string]interface{}{"Name": "iris"})
-	})
+	iris.Get("/container/terminal", containerTerminal)
 
-	// the path which the websocket client should listen/registed to ->
-	iris.Config.Websocket.Endpoint = "/bash"
-
-	client = &DockerClient{"http://127.0.0.1:2375"}
 	k8s = &K8sClient{"http://127.0.0.1:8080", make(map[string]*DockerClient)}
-
-	input := make(chan []byte)
-
-	ws := iris.Websocket // get the websocket server
-
-	ws.OnConnection(func(c websocket.Connection) {
-
-		id, _ := client.CreateExec("e1bf3828b1d", "/bin/bash")
-		fmt.Println("id:" + id)
-		output, err := client.ExecStart(id, input)
-		fmt.Println(err)
-		fmt.Println(output)
-
-		go func() {
-			for {
-				data := <-output
-				c.EmitMessage(data)
-			}
-		}()
-
-		c.OnMessage(func(data []byte) {
-			input <- data
-		})
-
-		c.OnDisconnect(func() {
-			fmt.Printf("\nConnection with ID: %s has been disconnected!", c.ID())
-		})
-
-	})
 
 	iris.Listen("0.0.0.0:8088")
 }
@@ -85,4 +51,49 @@ func listContainers(ctx *iris.Context) {
 func listNodes(ctx *iris.Context) {
 	nodes := k8s.Nodes()
 	ctx.JSON(iris.StatusOK, nodes)
+}
+
+func shellContainer(ctx *iris.Context) {
+	containerId := ctx.URLParam("containerId")
+	node := ctx.URLParam("node")
+	if len(containerId) > 0 && len(node) > 0 {
+		client := k8s.GetDockerClient(node)
+		input := make(chan []byte)
+
+		ws := websocket.NewServer(iris.Config.Websocket)
+		ws.OnConnection(func(c websocket.Connection) {
+
+			id, _ := client.CreateExec(containerId, "/bin/bash")
+			output, err := client.ExecStart(id, input)
+			if err != nil {
+				log.Println("Error: %v", err)
+			}
+
+			go func() {
+				for {
+					data := <-output
+					c.EmitMessage(data)
+				}
+			}()
+
+			c.OnMessage(func(data []byte) {
+				input <- data
+			})
+
+			c.OnDisconnect(func() {
+				log.Printf("\nConnection with ID: %s has been disconnected!", c.ID())
+			})
+
+		})
+
+		if err := ws.Upgrade(ctx); err != nil {
+			ctx.Write("Upgrade error!")
+		}
+		return
+	}
+	ctx.Write("param error!")
+}
+
+func containerTerminal(ctx *iris.Context) {
+	ctx.Render("terminal.html", nil)
 }

@@ -83,10 +83,8 @@ func (client *DockerClient) CreateExec(id string, cmd string) (string, error) {
 }
 
 func (client *DockerClient) ExecStart(id string, input chan []byte) (chan []byte, error) {
-
 	execUrl, _ := url.Parse(client.Host + "/exec/" + id + "/start")
 	return client.connect(execUrl, input)
-
 }
 
 func (client *DockerClient) connect(url *url.URL, input chan []byte) (chan []byte, error) {

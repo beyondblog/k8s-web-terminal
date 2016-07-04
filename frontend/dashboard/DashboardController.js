@@ -17,7 +17,7 @@ function DashboardController( dashboardService, $mdSidenav, $mdBottomSheet, $log
   self.nodes        = [ ];
   self.selectNode   = selectNode;
   self.toggleList   = toggleNodesList;
-  //self.share        = share;
+//  self.terminal     = terminal;
 
   // Load all nodes
 
@@ -64,6 +64,14 @@ function DashboardController( dashboardService, $mdSidenav, $mdBottomSheet, $log
 
     self.toggleList();
   }
+
+//  function terminal(container) {
+//    $log.debug("terminal")
+//
+//    var node = self.selected;
+//    $log.debug("node: {metadata.name} ip: {address} ", node.status.addresses[0]);
+//    $log.debug("containerId {Id}", container);
+//  }
 
 }
 
