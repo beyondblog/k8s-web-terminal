@@ -60,9 +60,15 @@ func shellContainer(ctx *iris.Context) {
 		client := k8s.GetDockerClient(node)
 		input := make(chan []byte)
 
+		wsConfig := iris.Config.Websocket
+		wsConfig.ReadBufferSize = 1024 * 1000
+		wsConfig.WriteBufferSize = 1024 * 1000
+		wsConfig.MaxMessageSize = 1024 * 1000
 		ws := websocket.NewServer(iris.Config.Websocket)
 		ws.OnConnection(func(c websocket.Connection) {
 
+			log.Printf("\nConnection with ID: %s ", c.ID())
+			//default using '/bin/bash' command
 			id, _ := client.CreateExec(containerId, "/bin/bash")
 			output, err := client.ExecStart(id, input)
 			if err != nil {

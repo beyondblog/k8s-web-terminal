@@ -47,11 +47,14 @@ function createTerminal(node, containerId, command) {
   term = new Terminal({
     cursorBlink:  true
   });
+
   protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
   socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/api/nodes/containers/shell/ws';
   socketURL += '?node=' + node + '&containerId=' + containerId + '&command=' + command;
 
-  socket = new WebSocket(socketURL);
+  socket = new ReconnectingWebSocket(socketURL);
+  socket.debug = true;
+  socket.timeoutInterval = 5400;
 
   term.open(terminalContainer);
   term.fit();
