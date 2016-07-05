@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -87,6 +88,25 @@ func (client *DockerClient) ExecStart(id string, input chan []byte) (chan []byte
 	return client.connect(execUrl, input)
 }
 
+func (client *DockerClient) ExecResize(id string, width int, height int) error {
+	execUrl := fmt.Sprintf(client.Host+"/exec/%s/resize?h=%d&w=%d", id, height, width)
+
+	resp, err := http.Post(execUrl, "application/json;charset=utf-8", nil)
+
+	if err != nil {
+		return err
+	}
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if len(body) == 0 {
+		return nil
+	}
+
+	return errors.New(string(body))
+
+}
+
 func (client *DockerClient) connect(url *url.URL, input chan []byte) (chan []byte, error) {
 	output := make(chan []byte)
 
@@ -118,7 +138,7 @@ func (client *DockerClient) connect(url *url.URL, input chan []byte) (chan []byt
 		defer rwc.Close()
 
 		for {
-			buf := make([]byte, 100)
+			buf := make([]byte, 1024)
 			_, err := br.Read(buf)
 			if err != nil {
 				if err.Error() == "EOF" {

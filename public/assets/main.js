@@ -34,9 +34,26 @@ var Query = function () {
   return query_string;
 }();
 
+function httpGet(url, successCallback, errorCallback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState != 4) 
+            return;
+
+        if (xmlHttp.status == 200)
+            successCallback  && successCallback(xmlHttp.responseText);
+        else 
+            errorCallback  && errorCallback();
+    }
+    xmlHttp.open("GET", url, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
 
 var node = Query.node;
 var containerId = Query.containerId;
+var socket = null;
 
 createTerminal(node, containerId, '/bin/bash');
 
@@ -48,22 +65,32 @@ function createTerminal(node, containerId, command) {
     cursorBlink:  true
   });
 
-  protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
-  socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/api/nodes/containers/shell/ws';
-  socketURL += '?node=' + node + '&containerId=' + containerId + '&command=' + command;
-
-  socket = new ReconnectingWebSocket(socketURL);
-  socket.debug = true;
-  socket.timeoutInterval = 5400;
 
   term.open(terminalContainer);
   term.fit();
   term.linkify();
-  term.toggleFullscreen()
+  term.toggleFullscreen();
+  console.log(term.cols);
+  console.log(term.rows);
 
-  socket.onopen = runRealTerminal;
-  socket.onclose = runFakeTerminal;
-  socket.onerror = runFakeTerminal;
+  httpGet('/api/nodes/containers/shell/create?node=' + node + '&containerId=' + containerId + '&command=' + command, function(data) {
+       var id = JSON.parse(data).id;
+       //set terminal size
+           
+       var protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
+       var socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/api/nodes/containers/shell/ws';
+       socketURL += '?id=' + id + '&node=' + node;
+       socket = new ReconnectingWebSocket(socketURL);
+       socket.debug = false;
+       socket.timeoutInterval = 5400;
+       socket.onopen = runRealTerminal;
+       socket.onclose = runFakeTerminal;
+       socket.onerror = runFakeTerminal;
+       httpGet('/api/nodes/containers/shell/resize?node=' + node + '&id=' + id + '&cols=' + term.cols + '&rows=' + term.rows);
+   }, function() {
+       term.writeln('Error create bash to container');
+   });
+
 }
 
 
@@ -90,6 +117,7 @@ function runFakeTerminal() {
   term.writeln('Type some keys and commands to play around.');
   term.writeln('');
   term.prompt();
+
 
   term.on('key', function (key, ev) {
     var printable = (
