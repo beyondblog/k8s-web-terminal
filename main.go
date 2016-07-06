@@ -12,7 +12,6 @@ import (
 func init() {
 	iris.Static("/assets", "./public/assets", 1)
 	iris.Static("/public", "./public", 1)
-	iris.Static("/frontend", "./frontend", 1)
 	iris.Config.Render.Template.Engine = iris.PongoEngine
 	iris.Config.Render.Rest.IndentJSON = true
 }

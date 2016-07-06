@@ -1,7 +1,6 @@
 System.config({
   baseURL: "/public",
   defaultJSExtensions: true,
-  separateCSS: true,
   transpiler: "babel",
   babelOptions: {
     "optional": [
@@ -12,10 +11,11 @@ System.config({
   paths: {
     "github:*": "jspm_packages/github/*",
     "npm:*": "jspm_packages/npm/*",
-    "app/*": "/frontend/*.js",
-    "dashboard/*": "/frontend/dashboard/*.js",
-    "utils/*": "/frontend/utils/*.js",
+    "app/*": "frontend/*.js",
+    "dashboard/*": "frontend/dashboard/*.js",
+    "utils/*": "frontend/utils/*.js"
   },
+  separateCSS: true,
 
   map: {
     "angular": "github:angular/bower-angular@1.5.7",
