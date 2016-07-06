@@ -47,9 +47,6 @@ func (client *DockerClient) ListContainers() []Container {
 	body, _ := ioutil.ReadAll(resp.Body)
 	items := make([]Container, 0)
 	json.Unmarshal(body, &items)
-	for _, container := range items {
-		fmt.Printf("%s %s\r\n", container.Id[:12], container.Names[0][1:])
-	}
 	return items
 }
 
