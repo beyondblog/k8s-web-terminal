@@ -3,9 +3,9 @@ Kubernetes web terminal
 
 ## Screenshot
 
-![dasbhoard]((/docs/screenshot/dashboard.png?raw=true))
+![dasbhoard](/docs/screenshot/dashboard.png?raw=true)
 
-![bash]((/docs/screenshot/bash.png?raw=true))
+![bash](/docs/screenshot/bash.png?raw=true)
 
 ## Quick Start
 
@@ -15,10 +15,11 @@ You need to install the build environment
 * Node.js (npm、bower、jspm to build the Angular frontend)
 
 ```bash
-    go build 
-    jspm install
+$ go build 
 
-    ./k8s-web-terminal
+$ jspm install
+
+$./k8s-web-terminal
 ```
 
 ## Usage
