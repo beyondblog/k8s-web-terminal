@@ -27,4 +27,4 @@ _testmain.go
 *.prof
 *.swp
 
-k8s-web-ssh
+k8s-web-terminal

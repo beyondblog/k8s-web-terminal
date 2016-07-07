@@ -1,0 +1,5 @@
+# Folders
+.git
+node_modules
+public/jspm_packages
+docs
