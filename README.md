@@ -19,7 +19,13 @@ $ go build
 
 $ jspm install
 
-$./k8s-web-terminal
+$ ./k8s-web-terminal
+```
+
+## Run at Docker
+
+```bash
+$ docker run --name k8s-web-terminal -d -p 8088:8088 -e K8S_API=http://KUBERNET_API_HOST:8080 beyondblog/k8s-web-terminal
 ```
 
 ## Usage
