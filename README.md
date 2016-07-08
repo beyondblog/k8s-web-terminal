@@ -15,7 +15,9 @@ You need to install the build environment
 * Node.js (npm、bower、jspm to build the Angular frontend)
 
 ```bash
-$ go build 
+$ godep restore
+
+$ godep go build 
 
 $ jspm install
 
