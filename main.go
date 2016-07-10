@@ -78,8 +78,11 @@ func shellContainer(ctx *iris.Context) {
 
 			go func() {
 				for {
-					data := <-output
-					c.EmitMessage(data)
+					if data, ok := <-output; ok {
+						c.EmitMessage(data)
+					} else {
+						break
+					}
 				}
 			}()
 
@@ -89,6 +92,10 @@ func shellContainer(ctx *iris.Context) {
 
 			c.OnDisconnect(func() {
 				log.Printf("\nConnection with ID: %s has been disconnected!", c.ID())
+
+				//send EOF to close chan
+				input <- []byte("EOF")
+				close(input)
 			})
 
 		})

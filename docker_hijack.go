@@ -114,7 +114,7 @@ func (client *DockerClient) connect(url *url.URL, input chan []byte) (chan []byt
 		}`))
 	dial, err := net.Dial("tcp", url.Host)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -125,9 +125,13 @@ func (client *DockerClient) connect(url *url.URL, input chan []byte) (chan []byt
 
 	go func() {
 		defer clientconn.Close()
+
 		for {
-			data := <-input
-			rwc.Write(data)
+			if data, ok := <-input; ok {
+				rwc.Write(data)
+			} else {
+				break
+			}
 		}
 	}()
 
@@ -147,6 +151,13 @@ func (client *DockerClient) connect(url *url.URL, input chan []byte) (chan []byt
 			}
 
 			output <- buf
+
+			//Equal EOF
+			if buf[0] == 69 && buf[1] == 79 && buf[2] == 70 {
+				close(output)
+				break
+			}
+
 			time.Sleep(500)
 			buf = nil
 		}
