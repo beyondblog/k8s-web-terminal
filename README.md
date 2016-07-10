@@ -1,5 +1,6 @@
 # k8s-web-terminal
 Kubernetes web terminal
+[![Build Status](https://travis-ci.org/beyondblog/k8s-web-terminal.svg?branch=master)](https://travis-ci.org/beyondblog/k8s-web-terminal)
 
 ## Screenshot
 
@@ -11,7 +12,7 @@ Kubernetes web terminal
 
 You need to install the build environment
 
-* Go 1.4+
+* Go 1.5+
 * Node.js (npm、bower、jspm to build the Angular frontend)
 
 ```bash
